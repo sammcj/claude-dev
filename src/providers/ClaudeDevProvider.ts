@@ -1,6 +1,6 @@
 import { Anthropic } from "@anthropic-ai/sdk";
 import * as vscode from "vscode";
-import { OpenDev } from "../OpenDev";
+import { ClaudeDev } from "../ClaudeDev";
 import { ApiModelId, ApiProvider, ApiConfiguration } from "../shared/api";
 import { ExtensionMessage } from "../shared/ExtensionMessage";
 import { WebviewMessage } from "../shared/WebviewMessage";
@@ -26,12 +26,12 @@ type GlobalStateKey =
 	| "customInstructions"
 	| "taskHistory";
 
-export class OpenDevProvider implements vscode.WebviewViewProvider {
-	public static readonly sideBarId = "open-dev.SidebarProvider"; // used in package.json as the view's id. This value cannot be changed due to how vscode caches views based on their id, and updating the id would break existing instances of the extension.
-	public static readonly tabPanelId = "open-dev.TabPanelProvider";
+export class ClaudeDevProvider implements vscode.WebviewViewProvider {
+	public static readonly sideBarId = "claude-dev.SidebarProvider"; // used in package.json as the view's id. This value cannot be changed due to how vscode caches views based on their id, and updating the id would break existing instances of the extension.
+	public static readonly tabPanelId = "claude-dev.TabPanelProvider";
 	private disposables: vscode.Disposable[] = [];
 	private view?: vscode.WebviewView | vscode.WebviewPanel;
-	private openDev?: OpenDev;
+	private claudeDev?: ClaudeDev;
 	private latestAnnouncementId = "aug-17-2024"; // update to some unique identifier when we add a new announcement
 
 	private async getEnvironmentVariables() {
@@ -49,7 +49,7 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
 	}
 
 	constructor(readonly context: vscode.ExtensionContext, private readonly outputChannel: vscode.OutputChannel) {
-		this.outputChannel.appendLine("OpenDevProvider instantiated");
+		this.outputChannel.appendLine("ClaudeDevProvider instantiated");
 	}
 
 	/*
@@ -58,7 +58,7 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
 	- https://github.com/microsoft/vscode-extension-samples/blob/main/webview-sample/src/extension.ts
 	*/
 	async dispose() {
-		this.outputChannel.appendLine("Disposing OpenDevProvider...");
+		this.outputChannel.appendLine("Disposing ClaudeDevProvider...");
 		await this.clearTask();
 		this.outputChannel.appendLine("Cleared task");
 		if (this.view && "dispose" in this.view) {
@@ -154,16 +154,16 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
 		this.outputChannel.appendLine("Webview view resolved");
 	}
 
-	async initOpenDevWithTask(task?: string, images?: string[]) {
+	async initClaudeDevWithTask(task?: string, images?: string[]) {
 		await this.clearTask(); // ensures that an exising task doesn't exist before starting a new one, although this shouldn't be possible since user must clear task before starting a new one
 		const { maxRequestsPerTask, apiConfiguration, customInstructions } = await this.getState();
-		this.openDev = new OpenDev(this, apiConfiguration, maxRequestsPerTask, customInstructions, task, images);
+		this.claudeDev = new ClaudeDev(this, apiConfiguration, maxRequestsPerTask, customInstructions, task, images);
 	}
 
-	async initOpenDevWithHistoryItem(historyItem: HistoryItem) {
+	async initClaudeDevWithHistoryItem(historyItem: HistoryItem) {
 		await this.clearTask();
 		const { maxRequestsPerTask, apiConfiguration, customInstructions } = await this.getState();
-		this.openDev = new OpenDev(
+		this.claudeDev = new ClaudeDev(
 			this,
 			apiConfiguration,
 			maxRequestsPerTask,
@@ -249,7 +249,7 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
             <meta http-equiv="Content-Security-Policy" content="default-src 'none'; font-src ${webview.cspSource}; style-src ${webview.cspSource} 'unsafe-inline'; img-src ${webview.cspSource} data:; script-src 'nonce-${nonce}';">
             <link rel="stylesheet" type="text/css" href="${stylesUri}">
 			<link href="${codiconsUri}" rel="stylesheet" />
-            <title>Open Dev</title>
+            <title>Claude Dev</title>
           </head>
           <body>
             <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -281,8 +281,8 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
 						// You can send any JSON serializable data.
 						// Could also do this in extension .ts
 						//this.postMessageToWebview({ type: "text", text: `Extension: ${Date.now()}` })
-						// initializing new instance of OpenDev will make sure that any agentically running promises in old instance don't affect our new task. this essentially creates a fresh slate for the new task
-						await this.initOpenDevWithTask(message.text, message.images);
+						// initializing new instance of ClaudeDev will make sure that any agentically running promises in old instance don't affect our new task. this essentially creates a fresh slate for the new task
+						await this.initClaudeDevWithTask(message.text, message.images);
 						break;
 					case "apiConfiguration":
 						if (message.apiConfiguration) {
@@ -304,7 +304,7 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
 							await this.storeSecret("awsAccessKey", awsAccessKey);
 							await this.storeSecret("awsSecretKey", awsSecretKey);
 							await this.updateGlobalState("awsRegion", awsRegion);
-							this.openDev?.updateApi(message.apiConfiguration);
+							this.claudeDev?.updateApi(message.apiConfiguration);
 						}
 						await this.postStateToWebview();
 						break;
@@ -317,17 +317,17 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
 							}
 						}
 						await this.updateGlobalState("maxRequestsPerTask", result);
-						this.openDev?.updateMaxRequestsPerTask(result);
+						this.claudeDev?.updateMaxRequestsPerTask(result);
 						await this.postStateToWebview();
 						break;
 					case "customInstructions":
 						// User may be clearing the field
 						await this.updateGlobalState("customInstructions", message.text || undefined);
-						this.openDev?.updateCustomInstructions(message.text || undefined);
+						this.claudeDev?.updateCustomInstructions(message.text || undefined);
 						await this.postStateToWebview();
 						break;
 					case "askResponse":
-						this.openDev?.handleWebviewAskResponse(message.askResponse!, message.text, message.images);
+						this.claudeDev?.handleWebviewAskResponse(message.askResponse!, message.text, message.images);
 						break;
 					case "clearTask":
 						// newTask will start a new task with a given task text, while clear task resets the current session and allows for a new task to be started
@@ -343,7 +343,7 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
 						await this.postMessageToWebview({ type: "selectedImages", images });
 						break;
 					case "exportCurrentTask":
-						const currentTaskId = this.openDev?.taskId;
+						const currentTaskId = this.claudeDev?.taskId;
 						if (currentTaskId) {
 							this.exportTaskWithId(currentTaskId);
 						}
@@ -416,10 +416,10 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
 	}
 
 	async showTaskWithId(id: string) {
-		if (id !== this.openDev?.taskId) {
+		if (id !== this.claudeDev?.taskId) {
 			// non-current task
 			const { historyItem } = await this.getTaskWithId(id);
-			await this.initOpenDevWithHistoryItem(historyItem); // clears existing task
+			await this.initClaudeDevWithHistoryItem(historyItem); // clears existing task
 		}
 		await this.postMessageToWebview({ type: "action", action: "chatButtonTapped" });
 	}
@@ -430,7 +430,7 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
 	}
 
 	async deleteTaskWithId(id: string) {
-		if (id === this.openDev?.taskId) {
+		if (id === this.claudeDev?.taskId) {
 			await this.clearTask();
 		}
 
@@ -477,7 +477,7 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
 				maxRequestsPerTask,
 				customInstructions,
 				themeName: vscode.workspace.getConfiguration("workbench").get<string>("colorTheme"),
-				claudeMessages: this.openDev?.claudeMessages || [],
+				claudeMessages: this.claudeDev?.claudeMessages || [],
 				taskHistory: (taskHistory || []).filter((item) => item.ts && item.task).sort((a, b) => b.ts - a.ts),
 				shouldShowAnnouncement: lastShownAnnouncementId !== this.latestAnnouncementId,
 			},
@@ -485,8 +485,8 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
 	}
 
 	async clearTask() {
-		this.openDev?.abortTask();
-		this.openDev = undefined; // removes reference to it, so once promises end it will be garbage collected
+		this.claudeDev?.abortTask();
+		this.claudeDev = undefined; // removes reference to it, so once promises end it will be garbage collected
 	}
 
 	// Caching mechanism to keep track of webview messages + API conversation history per provider instance
@@ -494,10 +494,10 @@ export class OpenDevProvider implements vscode.WebviewViewProvider {
 	/*
 	Now that we use retainContextWhenHidden, we don't have to store a cache of claude messages in the user's state, but we could to reduce memory footprint in long conversations.
 
-	- We have to be careful of what state is shared between OpenDevProvider instances since there could be multiple instances of the extension running at once. For example when we cached claude messages using the same key, two instances of the extension could end up using the same key and overwriting each other's messages.
+	- We have to be careful of what state is shared between ClaudeDevProvider instances since there could be multiple instances of the extension running at once. For example when we cached claude messages using the same key, two instances of the extension could end up using the same key and overwriting each other's messages.
 	- Some state does need to be shared between the instances, i.e. the API key--however there doesn't seem to be a good way to notfy the other instances that the API key has changed.
 
-	We need to use a unique identifier for each OpenDevProvider instance's message cache since we could be running several instances of the extension outside of just the sidebar i.e. in editor panels.
+	We need to use a unique identifier for each ClaudeDevProvider instance's message cache since we could be running several instances of the extension outside of just the sidebar i.e. in editor panels.
 
 	For now since we don't need to store task history, we'll just use an identifier unique to this provider instance (since there can be several provider instances open at once).
 	However in the future when we implement task history, we'll need to use a unique identifier for each task. As well as manage a data structure that keeps track of task history with their associated identifiers and the task message itself, to present in a 'Task History' view.

@@ -1,20 +1,20 @@
-import { VSCodeButton, VSCodeLink, VSCodeTextArea, VSCodeTextField } from "@vscode/webview-ui-toolkit/react"
-import React, { useEffect, useState } from "react"
-import { ApiConfiguration } from "../../../src/shared/api"
-import { validateApiConfiguration, validateMaxRequestsPerTask } from "../utils/validate"
-import { vscode } from "../utils/vscode"
-import ApiOptions from "./ApiOptions"
+import { VSCodeButton, VSCodeLink, VSCodeTextArea, VSCodeTextField } from "@vscode/webview-ui-toolkit/react";
+import React, { useEffect, useState } from "react";
+import { ApiConfiguration } from "../../../src/shared/api";
+import { validateApiConfiguration, validateMaxRequestsPerTask } from "../utils/validate";
+import { vscode } from "../utils/vscode";
+import ApiOptions from "./ApiOptions";
 
 type SettingsViewProps = {
-	version: string
-	apiConfiguration?: ApiConfiguration
-	setApiConfiguration: React.Dispatch<React.SetStateAction<ApiConfiguration | undefined>>
-	maxRequestsPerTask: string
-	setMaxRequestsPerTask: React.Dispatch<React.SetStateAction<string>>
-	customInstructions: string
-	setCustomInstructions: React.Dispatch<React.SetStateAction<string>>
-	onDone: () => void
-}
+	version: string;
+	apiConfiguration?: ApiConfiguration;
+	setApiConfiguration: React.Dispatch<React.SetStateAction<ApiConfiguration | undefined>>;
+	maxRequestsPerTask: string;
+	setMaxRequestsPerTask: React.Dispatch<React.SetStateAction<string>>;
+	customInstructions: string;
+	setCustomInstructions: React.Dispatch<React.SetStateAction<string>>;
+	onDone: () => void;
+};
 
 const SettingsView = ({
 	version,
@@ -26,31 +26,31 @@ const SettingsView = ({
 	setCustomInstructions,
 	onDone,
 }: SettingsViewProps) => {
-	const [apiErrorMessage, setApiErrorMessage] = useState<string | undefined>(undefined)
-	const [maxRequestsErrorMessage, setMaxRequestsErrorMessage] = useState<string | undefined>(undefined)
+	const [apiErrorMessage, setApiErrorMessage] = useState<string | undefined>(undefined);
+	const [maxRequestsErrorMessage, setMaxRequestsErrorMessage] = useState<string | undefined>(undefined);
 
 	const handleSubmit = () => {
-		const apiValidationResult = validateApiConfiguration(apiConfiguration)
-		const maxRequestsValidationResult = validateMaxRequestsPerTask(maxRequestsPerTask)
+		const apiValidationResult = validateApiConfiguration(apiConfiguration);
+		const maxRequestsValidationResult = validateMaxRequestsPerTask(maxRequestsPerTask);
 
-		setApiErrorMessage(apiValidationResult)
-		setMaxRequestsErrorMessage(maxRequestsValidationResult)
+		setApiErrorMessage(apiValidationResult);
+		setMaxRequestsErrorMessage(maxRequestsValidationResult);
 
 		if (!apiValidationResult && !maxRequestsValidationResult) {
-			vscode.postMessage({ type: "apiConfiguration", apiConfiguration })
-			vscode.postMessage({ type: "maxRequestsPerTask", text: maxRequestsPerTask })
-			vscode.postMessage({ type: "customInstructions", text: customInstructions })
-			onDone()
+			vscode.postMessage({ type: "apiConfiguration", apiConfiguration });
+			vscode.postMessage({ type: "maxRequestsPerTask", text: maxRequestsPerTask });
+			vscode.postMessage({ type: "customInstructions", text: customInstructions });
+			onDone();
 		}
-	}
+	};
 
 	useEffect(() => {
-		setApiErrorMessage(undefined)
-	}, [apiConfiguration])
+		setApiErrorMessage(undefined);
+	}, [apiConfiguration]);
 
 	useEffect(() => {
-		setMaxRequestsErrorMessage(undefined)
-	}, [maxRequestsPerTask])
+		setMaxRequestsErrorMessage(undefined);
+	}, [maxRequestsPerTask]);
 
 	// validate as soon as the component is mounted
 	/*
@@ -158,7 +158,7 @@ const SettingsView = ({
 							marginTop: "5px",
 							color: "var(--vscode-descriptionForeground)",
 						}}>
-						If Open Dev reaches this limit, it will pause and ask for your permission before making
+						If Claude Dev reaches this limit, it will pause and ask for your permission before making
 						additional requests.
 					</p>
 					{maxRequestsErrorMessage && (
@@ -184,15 +184,15 @@ const SettingsView = ({
 					}}>
 					<p style={{ wordWrap: "break-word", margin: 0, padding: 0 }}>
 						If you have any questions or feedback, feel free to open an issue at{" "}
-						<VSCodeLink href="https://github.com/sammcj/open-dev" style={{ display: "inline" }}>
-							https://github.com/sammcj/open-dev
+						<VSCodeLink href="https://github.com/saoudrizwan/claude-dev" style={{ display: "inline" }}>
+							https://github.com/saoudrizwan/claude-dev
 						</VSCodeLink>
 					</p>
 					<p style={{ fontStyle: "italic", margin: "10px 0 0 0", padding: 0 }}>v{version}</p>
 				</div>
 			</div>
 		</div>
-	)
-}
+	);
+};
 
-export default SettingsView
+export default SettingsView;

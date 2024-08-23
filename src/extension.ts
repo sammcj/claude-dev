@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from "vscode"
-import { OpenDevProvider } from "./providers/OpenDevProvider"
+import { ClaudeDevProvider } from "./providers/ClaudeDevProvider"
 
 /*
 Built using https://github.com/microsoft/vscode-webview-ui-toolkit
@@ -19,33 +19,33 @@ let outputChannel: vscode.OutputChannel
 export function activate(context: vscode.ExtensionContext) {
 	// Use the console to output diagnostic information (console.log) and errors (console.error)
 	// This line of code will only be executed once when your extension is activated
-	//console.log('Congratulations, your extension "open-dev" is now active!')
+	//console.log('Congratulations, your extension "claude-dev" is now active!')
 
-	outputChannel = vscode.window.createOutputChannel("Open Dev")
+	outputChannel = vscode.window.createOutputChannel("Claude Dev")
 	context.subscriptions.push(outputChannel)
 
-	outputChannel.appendLine("Open Dev extension activated")
+	outputChannel.appendLine("Claude Dev extension activated")
 
 	// The command has been defined in the package.json file
 	// Now provide the implementation of the command with registerCommand
 	// The commandId parameter must match the command field in package.json
-	// const disposable = vscode.commands.registerCommand("open-dev.helloWorld", () => {
+	// const disposable = vscode.commands.registerCommand("claude-dev.helloWorld", () => {
 	// 	// The code you place here will be executed every time your command is executed
 	// 	// Display a message box to the user
-	// 	vscode.window.showInformationMessage("Hello World from open-dev!")
+	// 	vscode.window.showInformationMessage("Hello World from claude-dev!")
 	// })
 	// context.subscriptions.push(disposable)
 
-	const sidebarProvider = new OpenDevProvider(context, outputChannel)
+	const sidebarProvider = new ClaudeDevProvider(context, outputChannel)
 
 	context.subscriptions.push(
-		vscode.window.registerWebviewViewProvider(OpenDevProvider.sideBarId, sidebarProvider, {
+		vscode.window.registerWebviewViewProvider(ClaudeDevProvider.sideBarId, sidebarProvider, {
 			webviewOptions: { retainContextWhenHidden: true },
 		})
 	)
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("open-dev.plusButtonTapped", async () => {
+		vscode.commands.registerCommand("claude-dev.plusButtonTapped", async () => {
 			outputChannel.appendLine("Plus button tapped")
 			await sidebarProvider.clearTask()
 			await sidebarProvider.postStateToWebview()
@@ -53,15 +53,15 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	)
 
-	const openOpenDevInNewTab = () => {
-		outputChannel.appendLine("Opening Open Dev in new tab")
+	const openClaudeDevInNewTab = () => {
+		outputChannel.appendLine("Opening Claude Dev in new tab")
 		// (this example uses webviewProvider activation event which is necessary to deserialize cached webview, but since we use retainContextWhenHidden, we don't need to use that event)
 		// https://github.com/microsoft/vscode-extension-samples/blob/main/webview-sample/src/extension.ts
-		const tabProvider = new OpenDevProvider(context, outputChannel)
+		const tabProvider = new ClaudeDevProvider(context, outputChannel)
 		//const column = vscode.window.activeTextEditor ? vscode.window.activeTextEditor.viewColumn : undefined
 		const lastCol = Math.max(...vscode.window.visibleTextEditors.map((editor) => editor.viewColumn || 0))
 		const targetCol = Math.max(lastCol + 1, 1)
-		const panel = vscode.window.createWebviewPanel(OpenDevProvider.tabPanelId, "Open Dev", targetCol, {
+		const panel = vscode.window.createWebviewPanel(ClaudeDevProvider.tabPanelId, "Claude Dev", targetCol, {
 			enableScripts: true,
 			retainContextWhenHidden: true,
 			localResourceRoots: [context.extensionUri],
@@ -76,19 +76,19 @@ export function activate(context: vscode.ExtensionContext) {
 		})
 	}
 
-	context.subscriptions.push(vscode.commands.registerCommand("open-dev.popoutButtonTapped", openOpenDevInNewTab));
-	context.subscriptions.push(vscode.commands.registerCommand("open-dev.openInNewTab", openOpenDevInNewTab))
+	context.subscriptions.push(vscode.commands.registerCommand("claude-dev.popoutButtonTapped", openClaudeDevInNewTab));
+	context.subscriptions.push(vscode.commands.registerCommand("claude-dev.openInNewTab", openClaudeDevInNewTab))
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("open-dev.settingsButtonTapped", () => {
-		//const message = "open-dev.settingsButtonTapped!"
+		vscode.commands.registerCommand("claude-dev.settingsButtonTapped", () => {
+		//const message = "claude-dev.settingsButtonTapped!"
 			//vscode.window.showInformationMessage(message)
 			sidebarProvider.postMessageToWebview({ type: "action", action: "settingsButtonTapped" })
 		})
 	)
 
 	context.subscriptions.push(
-		vscode.commands.registerCommand("open-dev.historyButtonTapped", () => {
+		vscode.commands.registerCommand("claude-dev.historyButtonTapped", () => {
 			sidebarProvider.postMessageToWebview({ type: "action", action: "historyButtonTapped" })
 		})
 	)
@@ -106,11 +106,11 @@ export function activate(context: vscode.ExtensionContext) {
 		}
 	})()
 	context.subscriptions.push(
-		vscode.workspace.registerTextDocumentContentProvider("open-dev-diff", diffContentProvider)
+		vscode.workspace.registerTextDocumentContentProvider("claude-dev-diff", diffContentProvider)
 	)
 }
 
 // This method is called when your extension is deactivated
 export function deactivate() {
-	outputChannel.appendLine("Open Dev extension deactivated")
+	outputChannel.appendLine("Claude Dev extension deactivated");
 }

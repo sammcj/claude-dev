@@ -1,5 +1,4 @@
-import { ApiConfiguration, ApiProvider, } from "./api";
-import { OpenAIHandler } from "../api/openai";
+import { ApiConfiguration } from "./api";
 
 export interface WebviewMessage {
 	type:

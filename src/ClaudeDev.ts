@@ -12,7 +12,7 @@ import treeKill from "tree-kill";
 import * as vscode from "vscode";
 import { ApiHandler, buildApiHandler } from "./api";
 import { listFiles, parseSourceCodeForDefinitionsTopLevel } from "./parse-source-code";
-import { OpenDevProvider } from "./providers/OpenDevProvider";
+import { ClaudeDevProvider } from "./providers/ClaudeDevProvider";
 import { ApiConfiguration } from "./shared/api";
 import { ClaudeRequestResult } from "./shared/ClaudeRequestResult";
 import { DEFAULT_MAX_REQUESTS_PER_TASK } from "./shared/Constants";
@@ -27,7 +27,7 @@ import { combineCommandSequences } from "./shared/combineCommandSequences";
 import { findLastIndex } from "./utils";
 
 const SYSTEM_PROMPT =
-	() => `You are Open Dev, a highly skilled software developer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices.
+	() => `You are Claude Dev, a highly skilled software developer with extensive knowledge in many programming languages, frameworks, design patterns, and best practices.
 
 ====
 
@@ -227,7 +227,7 @@ type UserContent = Array<
 	Anthropic.TextBlockParam | Anthropic.ImageBlockParam | Anthropic.ToolUseBlockParam | Anthropic.ToolResultBlockParam
 >;
 
-export class OpenDev {
+export class ClaudeDev {
 	readonly taskId: string;
 	private api: ApiHandler;
 	private maxRequestsPerTask: number;
@@ -240,11 +240,11 @@ export class OpenDev {
 	private askResponseImages?: string[];
 	private lastMessageTs?: number;
 	private executeCommandRunningProcess?: ResultPromise;
-	private providerRef: WeakRef<OpenDevProvider>;
+	private providerRef: WeakRef<ClaudeDevProvider>;
 	private abort: boolean = false;
 
 	constructor(
-		provider: OpenDevProvider,
+		provider: ClaudeDevProvider,
 		apiConfiguration: ApiConfiguration,
 		maxRequestsPerTask?: number,
 		customInstructions?: string,
@@ -378,9 +378,9 @@ export class OpenDev {
 		type: ClaudeAsk,
 		question?: string
 	): Promise<{ response: ClaudeAskResponse; text?: string; images?: string[]; }> {
-		// If this OpenDev instance was aborted by the provider, then the only thing keeping us alive is a promise still running in the background, in which case we don't want to send its result to the webview as it is attached to a new instance of OpenDev now. So we can safely ignore the result of any active promises, and this class will be deallocated. (Although we set openDev = undefined in provider, that simply removes the reference to this instance, but the instance is still alive until this promise resolves or rejects.)
+		// If this ClaudeDev instance was aborted by the provider, then the only thing keeping us alive is a promise still running in the background, in which case we don't want to send its result to the webview as it is attached to a new instance of ClaudeDev now. So we can safely ignore the result of any active promises, and this class will be deallocated. (Although we set claudeDev = undefined in provider, that simply removes the reference to this instance, but the instance is still alive until this promise resolves or rejects.)
 		if (this.abort) {
-			throw new Error("OpenDev instance aborted");
+			throw new Error("ClaudeDev instance aborted");
 		}
 		this.askResponse = undefined;
 		this.askResponseText = undefined;
@@ -402,7 +402,7 @@ export class OpenDev {
 
 	async say(type: ClaudeSay, text?: string, images?: string[]): Promise<undefined> {
 		if (this.abort) {
-			throw new Error("OpenDev instance aborted");
+			throw new Error("ClaudeDev instance aborted");
 		}
 		const sayTs = Date.now();
 		this.lastMessageTs = sayTs;
@@ -437,7 +437,7 @@ export class OpenDev {
 
 	private async startTask(task?: string, images?: string[]): Promise<void> {
 		// conversationHistory (for API) and claudeMessages (for webview) need to be in sync
-		// if the extension process were killed, then on restart the claudeMessages might not be empty, so we need to set it to [] when we create a new OpenDev client (otherwise webview would show stale messages from previous session)
+		// if the extension process were killed, then on restart the claudeMessages might not be empty, so we need to set it to [] when we create a new ClaudeDev client (otherwise webview would show stale messages from previous session)
 		this.claudeMessages = [];
 		this.apiConversationHistory = [];
 		await this.providerRef.deref()?.postStateToWebview();
@@ -766,7 +766,7 @@ export class OpenDev {
 					vscode.Uri.file(absolutePath),
 					// to create a virtual doc we use a uri scheme registered in extension.ts, which then converts this base64 content into a text document
 					// (providing file name with extension in the uri lets vscode know the language of the file and apply syntax highlighting)
-					vscode.Uri.parse(`open-dev-diff:${fileName}`).with({
+					vscode.Uri.parse(`claude-dev-diff:${fileName}`).with({
 						query: Buffer.from(newContent).toString("base64"),
 					}),
 					`${fileName}: Original ↔ Suggested Changes`
@@ -801,10 +801,10 @@ export class OpenDev {
 				const fileName = path.basename(absolutePath);
 				vscode.commands.executeCommand(
 					"vscode.diff",
-					vscode.Uri.parse(`open-dev-diff:${fileName}`).with({
+					vscode.Uri.parse(`claude-dev-diff:${fileName}`).with({
 						query: Buffer.from("").toString("base64"),
 					}),
-					vscode.Uri.parse(`open-dev-diff:${fileName}`).with({
+					vscode.Uri.parse(`claude-dev-diff:${fileName}`).with({
 						query: Buffer.from(newContent).toString("base64"),
 					}),
 					`${fileName}: New File`
@@ -851,7 +851,7 @@ export class OpenDev {
 			.flat()
 			.filter(
 				(tab) =>
-					tab.input instanceof vscode.TabInputTextDiff && tab.input?.modified?.scheme === "open-dev-diff"
+					tab.input instanceof vscode.TabInputTextDiff && tab.input?.modified?.scheme === "claude-dev-diff"
 			);
 		for (const tab of tabs) {
 			await vscode.window.tabGroups.close(tab);
@@ -1232,14 +1232,14 @@ ${this.customInstructions.trim()}
 
 	async recursivelyMakeClaudeRequests(userContent: UserContent): Promise<ClaudeRequestResult> {
 		if (this.abort) {
-			throw new Error("OpenDev instance aborted");
+			throw new Error("ClaudeDev instance aborted");
 		}
 
 		await this.addToApiConversationHistory({ role: "user", content: userContent });
 		if (this.requestCount >= this.maxRequestsPerTask) {
 			const { response } = await this.ask(
 				"request_limit_reached",
-				`Open Dev has reached the maximum number of requests for this task. Would you like to reset the count and allow him to proceed?`
+				`Claude Dev has reached the maximum number of requests for this task. Would you like to reset the count and allow him to proceed?`
 			);
 
 			if (response === "yesButtonTapped") {
@@ -1270,7 +1270,7 @@ ${this.customInstructions.trim()}
 			this.requestCount++;
 
 			if (this.abort) {
-				throw new Error("OpenDev instance aborted");
+				throw new Error("ClaudeDev instance aborted");
 			}
 
 			let assistantResponses: Anthropic.Messages.ContentBlock[] = [];

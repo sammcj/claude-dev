@@ -1,6 +1,6 @@
 {
-  "name": "open-dev",
-  "displayName": "Open Dev",
+  "name": "claude-dev",
+  "displayName": "Claude Dev",
   "description": "Autonomous coding agent right in your IDE, capable of creating/editing files, executing commands, and more with your permission every step of the way.",
   "version": "1.3.43",
   "icon": "icon.png",
@@ -11,10 +11,10 @@
     "name": "Saoud Rizwan"
   },
   "license": "MIT",
-  "publisher": "sammcj",
+  "publisher": "saoudrizwan",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sammcj/open-dev"
+    "url": "https://github.com/saoudrizwan/claude-dev"
   },
   "categories": [
     "AI"
@@ -32,69 +32,69 @@
     "viewsContainers": {
       "activitybar": [
         {
-          "id": "open-dev-ActivityBar",
-          "title": "Open Dev",
+          "id": "claude-dev-ActivityBar",
+          "title": "Claude Dev",
           "icon": "$(robot)"
         }
       ]
     },
     "views": {
-      "open-dev-ActivityBar": [
+      "claude-dev-ActivityBar": [
         {
           "type": "webview",
-          "id": "open-dev.SidebarProvider",
+          "id": "claude-dev.SidebarProvider",
           "name": ""
         }
       ]
     },
     "commands": [
       {
-        "command": "open-dev.plusButtonTapped",
+        "command": "claude-dev.plusButtonTapped",
         "title": "New Task",
         "icon": "$(add)"
       },
       {
-        "command": "open-dev.historyButtonTapped",
+        "command": "claude-dev.historyButtonTapped",
         "title": "History",
         "icon": "$(history)"
       },
       {
-        "command": "open-dev.popoutButtonTapped",
+        "command": "claude-dev.popoutButtonTapped",
         "title": "Open in Editor",
         "icon": "$(link-external)"
       },
       {
-        "command": "open-dev.settingsButtonTapped",
+        "command": "claude-dev.settingsButtonTapped",
         "title": "Settings",
         "icon": "$(settings-gear)"
       },
       {
-        "command": "open-dev.openInNewTab",
+        "command": "claude-dev.openInNewTab",
         "title": "Open In New Tab",
-        "category": "Open Dev"
+        "category": "Claude Dev"
       }
     ],
     "menus": {
       "view/title": [
         {
-          "command": "open-dev.plusButtonTapped",
+          "command": "claude-dev.plusButtonTapped",
           "group": "navigation@1",
-          "when": "view == open-dev.SidebarProvider"
+          "when": "view == claude-dev.SidebarProvider"
         },
         {
-          "command": "open-dev.historyButtonTapped",
+          "command": "claude-dev.historyButtonTapped",
           "group": "navigation@2",
-          "when": "view == open-dev.SidebarProvider"
+          "when": "view == claude-dev.SidebarProvider"
         },
         {
-          "command": "open-dev.popoutButtonTapped",
+          "command": "claude-dev.popoutButtonTapped",
           "group": "navigation@3",
-          "when": "view == open-dev.SidebarProvider"
+          "when": "view == claude-dev.SidebarProvider"
         },
         {
-          "command": "open-dev.settingsButtonTapped",
+          "command": "claude-dev.settingsButtonTapped",
           "group": "navigation@4",
-          "when": "view == open-dev.SidebarProvider"
+          "when": "view == claude-dev.SidebarProvider"
         }
       ]
     }

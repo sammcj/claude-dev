@@ -19,8 +19,8 @@ export class OpenRouterHandler implements ApiHandler {
 			baseURL: "https://openrouter.ai/api/v1",
 			apiKey: this.options.openRouterApiKey,
 			defaultHeaders: {
-				"HTTP-Referer": "https://github.com/sammcj/open-dev", // Optional, for including your app on openrouter.ai rankings.
-				"X-Title": "open-dev", // Optional. Shows in rankings on openrouter.ai.
+				"HTTP-Referer": "https://github.com/saoudrizwan/claude-dev", // Optional, for including your app on openrouter.ai rankings.
+				"X-Title": "claude-dev", // Optional. Shows in rankings on openrouter.ai.
 			},
 		})
 	}
@@ -379,9 +379,9 @@ export class OpenRouterHandler implements ApiHandler {
 		return {
 			model: this.getModel().id,
 			max_tokens: this.getModel().info.maxTokens,
-			system: "(see SYSTEM_PROMPT in src/OpenDev.ts)",
+			system: "(see SYSTEM_PROMPT in src/ClaudeDev.ts)",
 			messages: [{ conversation_history: "..." }, { role: "user", content: withoutImageData(userContent) }],
-			tools: "(see tools in src/OpenDev.ts)",
+			tools: "(see tools in src/ClaudeDev.ts)",
 			tool_choice: "auto",
 		}
 	}

@@ -102,9 +102,9 @@ export class AnthropicHandler implements ApiHandler {
 		return {
 			model: this.getModel().id,
 			max_tokens: this.getModel().info.maxTokens,
-			system: "(see SYSTEM_PROMPT in src/OpenDev.ts)",
+			system: "(see SYSTEM_PROMPT in src/ClaudeDev.ts)",
 			messages: [{ conversation_history: "..." }, { role: "user", content: withoutImageData(userContent) }],
-			tools: "(see tools in src/OpenDev.ts)",
+			tools: "(see tools in src/ClaudeDev.ts)",
 			tool_choice: { type: "auto" },
 		}
 	}

@@ -19,8 +19,8 @@ export class OpenAIHandler implements ApiHandler {
 			baseURL: this.options.openAiBaseUrl || "https://api.openai.com/v1",
 			apiKey: this.options.openAiApiKey,
 			defaultHeaders: {
-				"HTTP-Referer": "https://github.com/sammcj/open-dev", // Optional, for including your app on openAI.ai rankings.
-				"X-Title": "open-dev", // Optional. Shows in rankings on openAI.ai.
+				"HTTP-Referer": "https://github.com/saoudrizwan/claude-dev", // Optional, for including your app on openAI.ai rankings.
+				"X-Title": "claude-dev", // Optional. Shows in rankings on openAI.ai.
 			},
 		});
 	}
@@ -389,9 +389,9 @@ export class OpenAIHandler implements ApiHandler {
 		return {
 			model: this.getModel().id,
 			max_tokens: this.getModel().info.maxTokens,
-			system: "(see SYSTEM_PROMPT in src/OpenDev.ts)",
+			system: "(see SYSTEM_PROMPT in src/ClaudeDev.ts)",
 			messages: [{ conversation_history: "..." }, { role: "user", content: withoutImageData(userContent) }],
-			tools: "(see tools in src/OpenDev.ts)",
+			tools: "(see tools in src/ClaudeDev.ts)",
 			tool_choice: "auto",
 		};
 	}

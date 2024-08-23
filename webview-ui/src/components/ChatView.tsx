@@ -45,7 +45,7 @@ const ChatView = ({
 	showHistoryView,
 }: ChatViewProps) => {
 	//const task = messages.length > 0 ? (messages[0].say === "task" ? messages[0] : undefined) : undefined) : undefined
-	const task = messages.length > 0 ? messages[0] : undefined; // leaving this less safe version here since if the first message is not a task, then the extension is in a bad state and needs to be debugged (see OpenDev.abort)
+	const task = messages.length > 0 ? messages[0] : undefined; // leaving this less safe version here since if the first message is not a task, then the extension is in a bad state and needs to be debugged (see ClaudeDev.abort)
 	const modifiedMessages = useMemo(() => combineApiRequests(combineCommandSequences(messages.slice(1))), [messages])
 	// has to be after api_req_finished are all reduced into api_req_started messages
 	const apiMetrics = useMemo(() => getApiMetrics(modifiedMessages), [modifiedMessages])

@@ -1,6 +1,6 @@
 # Change Log
 
-All notable changes to the "open-dev" extension will be documented in this file.
+All notable changes to the "claude-dev" extension will be documented in this file.
 
 <!-- Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file. -->
 
@@ -44,7 +44,7 @@ All notable changes to the "open-dev" extension will be documented in this file.
 
 ## [1.0.4]
 
-- Open in the editor (using menu bar or `Open Dev: Open In New Tab` in command palette) to see how Claude updates your workspace more clearly
+- Open in the editor (using menu bar or `Claude Dev: Open In New Tab` in command palette) to see how Claude updates your workspace more clearly
 - New `analyze_project` tool to help Claude get a comprehensive overview of your project's source code definitions and file structure
 - Provide feedback to tool use like terminal commands and file edits
 - Updated max output tokens to 8192 so less lazy coding (`// rest of code here...`)
